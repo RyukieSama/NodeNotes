@@ -16,6 +16,11 @@ app.use(async(ctx,next) => {
     ctx.response.body = '<h1>HelloRyukieSama!</h1>';
 });
 
+app.use(async(ctx,next) => {
+    console.log('end');
+});
+
+
 //监听端口
 app.listen(3000);
 console.log('app started at port 3000...');
