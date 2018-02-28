@@ -1,5 +1,5 @@
 /**
- * Created by RyukieW on 2018/2/24.
+ * Created by RyukieW on 2018/2/28.
  */
 
 "use_strict";
@@ -14,59 +14,44 @@ const Koa = require('koa');
  * */
 const router = require('koa-router')();
 const bodyParser = require('koa-bodyparser');
+var fs = require('fs');
 
 const app = new Koa();
 
-// demo 001
-// //对于任何请求, app将调用异步函数处理请求
-// app.use(async(ctx,next) => {
-//     await next();
-//     ctx.response.type = 'text/html';
-//     ctx.response.body = '<h1>HelloRyukieSama!</h1>';
-// });
-//
-// app.use(async(ctx,next) => {
-//     console.log('end');
-// });
+function  addControllers(router) {
+    var files = fs.readdirSync(__dirname + '/controller');
+    var js_files = files.filter((f) => {
+            return f.endsWith('.js');
+        });
 
-//demo 002
-app.use(async(ctx,next) => {
-    console.log(`Process ${ctx.request.method} ${ctx.request.url} ...`);
-    await next();
-});
-
-router.get(`/`,async(ctx,next) => {
-    ctx.response.body = `<h1>Index<h1>`;
-});
-
-router.get(`/hello/:name`,async(ctx,next) => {
-    var name = ctx.params.name;
-    // ctx.response.type = 'text/html';
-    ctx.response.body = `<h1>Hello, ${name}!</h1>`;
-});
-
-// Demo 003 post
-router.get('/home', async (ctx, next) => {
-    ctx.response.body = `<h1>Index</h1>
-        <form action="/signin" method="post">
-            <p>Name: <input name="name" value="koa"></p>
-            <p>Password: <input name="password" type="password"></p>
-            <p><input type="submit" value="Submit"></p>
-        </form>`;
-});
-
-router.post('/signin', async (ctx, next) => {
-    var name = ctx.request.body.name || '',
-    password = ctx.request.body.password || '';
-console.log(`signin with name: ${name}, password: ${password}`);
-if (name === 'koa' && password === '12345') {
-    ctx.response.body = `<h1>Welcome, ${name}!</h1>`;
-} else {
-    ctx.response.body = `<h1>Login failed!</h1>
-        <p><a href="/home">Try again</a></p>`;
+    for (var f of js_files) {
+        console.log(`process controller: ${f}...`);
+        let mapping = require(__dirname + '/controller/' + f);
+        addMapping(router,mapping);
+    }
 }
-});
 
+function addMapping(router,mapping) {
+    for (var url in mapping) {
+        if (url.startsWith('GET')) {
+
+            var path = url.substring(4);
+            router.get(path,mapping[url]);
+            console.log(`register URL mapping: GET ${path}`);
+
+        } else if (url.startsWith('POST ')) {
+
+            var path = url.substring(5);
+            router.post(path, mapping[url]);
+            console.log(`register URL mapping: POST ${path}`);
+
+        } else {
+            console.log(`invalid URL: ${url}`);
+        }
+    }
+}
+
+addControllers(router);
 
 // add router middleware:
 // 由于middleware的顺序很重要，这个koa-bodyparser必须在router之前被注册到app对象上。
