@@ -13,6 +13,7 @@ const Koa = require('koa');
  const router = fn_router();
  * */
 const router = require('koa-router')();
+const bodyParser = require('koa-bodyparser');
 
 const app = new Koa();
 
@@ -44,7 +45,32 @@ router.get(`/hello/:name`,async(ctx,next) => {
     ctx.response.body = `<h1>Hello, ${name}!</h1>`;
 });
 
+// Demo 003 post
+router.get('/home', async (ctx, next) => {
+    ctx.response.body = `<h1>Index</h1>
+        <form action="/signin" method="post">
+            <p>Name: <input name="name" value="koa"></p>
+            <p>Password: <input name="password" type="password"></p>
+            <p><input type="submit" value="Submit"></p>
+        </form>`;
+});
+
+router.post('/signin', async (ctx, next) => {
+    var name = ctx.request.body.name || '',
+    password = ctx.request.body.password || '';
+console.log(`signin with name: ${name}, password: ${password}`);
+if (name === 'koa' && password === '12345') {
+    ctx.response.body = `<h1>Welcome, ${name}!</h1>`;
+} else {
+    ctx.response.body = `<h1>Login failed!</h1>
+        <p><a href="/home">Try again</a></p>`;
+}
+});
+
+
 // add router middleware:
+// 由于middleware的顺序很重要，这个koa-bodyparser必须在router之前被注册到app对象上。
+app.use(bodyParser());
 app.use(router.routes());
 
 //监听端口
