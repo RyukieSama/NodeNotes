@@ -11,12 +11,25 @@ var products = [{
 }];
 
 module.exports = {
-    'GET /api/products': async (ctx, next) => {
-        // 设置Content-Type:
+    'GET /api/products' : async(ctx,next) => {
+        //设置Content-type
         ctx.response.type = 'application/json';
-        // 设置Response Body:
+        //设置Body
         ctx.response.body = {
-            products: products
+            iPhone : products
         };
+    },
+
+    'POST /api/products' : async(ctx,next) => {
+        var p = {
+            name : ctx.request.body.name,
+            price : ctx.request.body.price
+        };
+        products.push(p);
+
+        ctx.response.type = 'application/json';
+        ctx.response.body = p;
+
+        console.log(p);
     }
 }
