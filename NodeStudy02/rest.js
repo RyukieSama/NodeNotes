@@ -3,6 +3,12 @@
  */
 
 module.exports = {
+    APIError : function (code,message) {
+        this.code = code || 'internal:unknown_error';
+        this.message = message || '';
+    },
+
+
     restify : (pathPrefix) => {
         pathPrefix = pathPrefix || '/api/';
 
@@ -12,7 +18,19 @@ module.exports = {
                     ctx.response.type = 'application/json';
                     ctx.response.body = data;
                 }
-                await next();
+
+                try {
+                    await next();
+                } catch (err) {
+                    console.log('Process API error...');
+                    ctx.response.status = 400;
+                    ctx.response.type = 'application/json';
+                    ctx.response.body = {
+                        code: err.code || 'internal:unknown_error',
+                        message: err.message || ''
+                    };
+                }
+
             } else {
                 await next();
             }
