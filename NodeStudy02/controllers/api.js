@@ -12,12 +12,11 @@ var products = [{
 
 module.exports = {
     'GET /api/products' : async(ctx,next) => {
-        //设置Content-type
-        ctx.response.type = 'application/json';
-        //设置Body
-        ctx.response.body = {
+
+        ctx.rest({
             iPhone : products
-        };
+        });
+
     },
 
     'POST /api/products' : async(ctx,next) => {
@@ -27,8 +26,7 @@ module.exports = {
         };
         products.push(p);
 
-        ctx.response.type = 'application/json';
-        ctx.response.body = p;
+        ctx.rest(p);
 
         console.log(p);
     }
