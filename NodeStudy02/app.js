@@ -10,6 +10,20 @@ const app = new Koa();
 const controller = require('./contoller');
 const rest = require('./rest');
 
+const MongoClient = require('mongodb').MongoClient;
+var mongoURL = "mongodb://localhost:27017/";
+
+MongoClient.connect(mongoURL, function(err, db) {
+    if (err) throw err;
+    var dbo = db.db("NodeStudy02");
+    var myobj = { name: "test", url: "www.google.com" };
+    dbo.collection("site").insertOne(myobj, function(err, res) {
+        if (err) throw err;
+        console.log("文档插入成功");
+        db.close();
+    });
+});
+
 //一定要注意顺序
 app.use(bodyParser());
 
